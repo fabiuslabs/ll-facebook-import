@@ -25,5 +25,25 @@ while ( my $fn = $iter->() ) {
     $fh->close() or die "Couldn't close $fn: $!\n";
 }
 
-p $data;
+my $json;
+
+# map world leader information by country
+
+map {;
+    $json->{$_->{COUNTRY}}->{Leader} = $_
+    } @{ $data->{'WorldLeaders_Facebook.csv'} };
+
+# map U.S. information by state
+
+map {; 
+    delete $_->{ID}; $json->{'United States'}->{$_->{State}}->{'Governor'} = $_ 
+    } @{ $data->{'governors_facebook.csv'} };
+
+map {; 
+    delete $_->{'Page ID'}; 
+    ($_->{District} eq "Senate") 
+        ? (push @{ $json->{'United States'}->{$_->{State}}->{Senate} }, $_)
+        : ($json->{'United States'}->{$_->{State}}->{'U.S. House'}->{$_->{District}} = $_)
+    } @{ $data->{'113th Congress Official Pages.csv'} };
+
 
