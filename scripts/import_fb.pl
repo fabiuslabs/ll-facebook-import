@@ -18,7 +18,7 @@ my $data;
 
 while ( my $fn = $iter->() ) {
     next unless $fn =~ /\.csv$/;
-    my $csv = Text::CSV_XS->new();
+    my $csv = Text::CSV_XS->new({ binary => 1, auto_diag => 1 });
     my $fh = $fn->openr() or die "Couldn't open $fn: $!\n";
     $csv->column_names( $csv->getline($fh) );
     $data->{$fn->basename()} = $csv->getline_hr_all($fh);
@@ -46,4 +46,12 @@ map {;
         : ($json->{'United States'}->{$_->{State}}->{'U.S. House'}->{$_->{District}} = $_)
     } @{ $data->{'113th Congress Official Pages.csv'} };
 
+# map US Federal agencies by type
 
+map {;
+    delete $_->{'ID'};
+    push @{ $json->{'United States'}->{'Agencies'}->{'Federal'}->{$_->{'NOTES'}} }, $_
+    } @{ $data->{'USFederalAgencies_Facebook.csv'} };
+
+
+say JSON->new->pretty->encode($json);
