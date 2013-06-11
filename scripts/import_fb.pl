@@ -54,4 +54,8 @@ map {;
     } @{ $data->{'USFederalAgencies_Facebook.csv'} };
 
 
-say JSON->new->pretty->encode($json);
+my $aref;
+
+map {; push @{ $aref }, { $_ => $json->{$_} } } keys %{ $json };
+
+say JSON->new->pretty->encode($aref);
